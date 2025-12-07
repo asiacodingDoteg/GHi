@@ -73,7 +73,8 @@
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-.reconnect-button {
+.reconnect-button,
+.settings-button {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
@@ -88,7 +89,8 @@
   gap: 6px;
 }
 
-.reconnect-button:hover:not(:disabled) {
+.reconnect-button:hover:not(:disabled),
+.settings-button:hover:not(:disabled) {
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
@@ -99,7 +101,8 @@
   cursor: not-allowed;
 }
 
-:root.dark-mode .reconnect-button {
+:root.dark-mode .reconnect-button,
+:root.dark-mode .settings-button {
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
 }
 

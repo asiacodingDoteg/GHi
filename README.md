@@ -4,17 +4,23 @@ A real-time web-based GUI application for monitoring gas sensors (MQ series) con
 
 ## Features
 
-✅ **Real-time Monitoring**: Live sensor readings with automatic 1-second refresh  
-✅ **3 Independent Sensors**: Side-by-side panel layout for easy comparison  
+✅ **Real-time Monitoring**: Live sensor readings with automatic refresh
+✅ **Multiple Data Formats**: Supports GAS=value, CSV, and JSON formats
+✅ **3 Independent Sensors**: Side-by-side panel layout for easy comparison
 ✅ **Visual Indicators**:
   - Green LED (Safe) / Red LED (Alert)
   - Buzzer icon with animation (when gas detected)
   - Status badge (Safe / Gas Detected)
 
-✅ **Smart Event Logging**: Timestamped log of all status changes  
-✅ **Responsive Design**: Works on desktop, tablet, and mobile  
-✅ **Mock Data Support**: Works without Arduino connection (shows simulation)  
-✅ **Customizable Threshold**: Default 300 ppm, easily adjustable  
+✅ **Smart Event Logging**: Timestamped log of all status changes
+✅ **Settings Panel**:
+  - Adjustable threshold (0-2000 ppm) with slider
+  - Quick presets (200/300/500/1000 ppm)
+  - Auto-save to browser storage
+
+✅ **Responsive Design**: Works on desktop, tablet, and mobile
+✅ **Mandatory UART**: Requires real hardware connection (no mock data)
+✅ **Dark Mode**: Eye-friendly interface with toggle  
 
 ## System Requirements
 
@@ -55,9 +61,16 @@ See `ARDUINO_EXAMPLE.md` for complete Arduino sketch and pin configuration.
 
 ## Serial Data Format
 
-The GUI supports two data formats from Arduino:
+The GUI supports three data formats from Arduino:
 
-### CSV Format (Recommended)
+### GAS=value Format (Recommended for Single Sensor)
+```
+GAS=450
+GAS=280
+```
+Simple, lightweight format for single gas sensor. See `ARDUINO_EXAMPLE_GAS_FORMAT.md` for details.
+
+### CSV Format (Multiple Sensors)
 ```
 value1,value2,value3
 450,280,320
@@ -72,23 +85,28 @@ value1,value2,value3
 
 ## Configuration
 
-### Adjust Threshold
+### Adjust Gas Detection Threshold (Via Settings Panel)
 
-Edit `src/App.jsx` line 8:
+1. Once connected to UART, click **⚙️ Settings** button
+2. Use the **Threshold slider** to adjust (0-2000 ppm)
+3. Or use **Quick Presets**:
+   - 200 ppm: High sensitivity
+   - 300 ppm: Balanced (default)
+   - 500 ppm: Medium sensitivity
+   - 1000 ppm: Low sensitivity
+4. Settings save **automatically** to browser storage
+
+### Programmatic Configuration
+
+If you need to change defaults, edit `src/App.jsx`:
+
 ```javascript
-const THRESHOLD = 300  // Change this value (in ppm)
-```
-
-### Change Refresh Rate
-
-Edit `src/App.jsx` line 95:
-```javascript
-}, 1000)  // Change to desired milliseconds
+const DEFAULT_THRESHOLD = 300  // Default threshold in ppm
 ```
 
 ### Modify Sensor Names
 
-Edit `src/App.jsx` line 9:
+Edit `src/App.jsx` line 10:
 ```javascript
 const SENSOR_IDS = ['Sensor 1', 'Sensor 2', 'Sensor 3']
 ```
@@ -117,6 +135,14 @@ const SENSOR_IDS = ['Sensor 1', 'Sensor 2', 'Sensor 3']
 ```
 
 ## Features Explained
+
+### Settings Panel (Connected Only)
+Accessible via **⚙️ Settings** button in header:
+- **Threshold Slider**: Fine-tune gas detection threshold (0-2000 ppm)
+- **Numeric Input**: Enter exact PPM value
+- **Quick Presets**: 200/300/500/1000 ppm presets
+- **Auto-Save**: Settings persist in browser storage
+- **Real-time Updates**: All sensors immediately use new threshold
 
 ### Sensor Panels
 Each sensor panel displays:

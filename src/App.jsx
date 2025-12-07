@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import SensorPanel from './components/SensorPanel'
 import EventLog from './components/EventLog'
+import SettingsPanel from './components/SettingsPanel'
 import { SerialHandler } from './utils/serialHandler'
 import './styles/app.css'
 
-const THRESHOLD = 300
+const DEFAULT_THRESHOLD = 300
 const SENSOR_IDS = ['Sensor 1', 'Sensor 2', 'Sensor 3']
 
 export default function App() {
@@ -21,8 +22,16 @@ export default function App() {
     }
     return false
   })
+  const [threshold, setThreshold] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('gasThreshold')
+      return saved ? parseInt(saved, 10) : DEFAULT_THRESHOLD
+    }
+    return DEFAULT_THRESHOLD
+  })
   const [isLoading, setIsLoading] = useState(false)
   const [connectionError, setConnectionError] = useState(null)
+  const [showSettings, setShowSettings] = useState(false)
   const serialHandlerRef = useRef(null)
   const previousStatusRef = useRef({
     'Sensor 1': 'Safe',
@@ -39,6 +48,55 @@ export default function App() {
     }
   }, [isDarkMode])
 
+  useEffect(() => {
+    localStorage.setItem('gasThreshold', threshold.toString())
+  }, [threshold])
+
+  const parseUARTData = (rawData) => {
+    if (typeof rawData !== 'string') return null
+
+    const trimmedData = rawData.trim()
+
+    if (trimmedData.includes('GAS=')) {
+      const match = trimmedData.match(/GAS=(\d+\.?\d*)/)
+      if (match) {
+        const value = parseFloat(match[1])
+        return {
+          sensor1: value,
+          sensor2: 0,
+          sensor3: 0,
+          dataType: 'single',
+        }
+      }
+    }
+
+    if (trimmedData.includes(',')) {
+      const values = trimmedData.split(',').map(v => parseFloat(v.trim()))
+      return {
+        sensor1: values[0] || 0,
+        sensor2: values[1] || 0,
+        sensor3: values[2] || 0,
+        dataType: 'csv',
+      }
+    }
+
+    if (trimmedData.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(trimmedData)
+        return {
+          sensor1: parsed.sensor1 || 0,
+          sensor2: parsed.sensor2 || 0,
+          sensor3: parsed.sensor3 || 0,
+          dataType: 'json',
+        }
+      } catch (e) {
+        return null
+      }
+    }
+
+    return null
+  }
+
   const connectToUART = async () => {
     setIsLoading(true)
     setConnectionError(null)
@@ -50,21 +108,10 @@ export default function App() {
     try {
       const handleData = (data) => {
         try {
-          let parsedData
-
-          if (typeof data === 'string') {
-            if (data.includes(',')) {
-              const values = data.split(',').map(v => parseFloat(v.trim()))
-              parsedData = {
-                sensor1: values[0] || 0,
-                sensor2: values[1] || 0,
-                sensor3: values[2] || 0,
-              }
-            } else {
-              parsedData = JSON.parse(data)
-            }
-          } else {
-            parsedData = data
+          const parsedData = parseUARTData(data)
+          if (!parsedData) {
+            console.warn('Could not parse UART data:', data)
+            return
           }
 
           setSensors(prevSensors => {
@@ -74,7 +121,7 @@ export default function App() {
             SENSOR_IDS.forEach((sensorId, index) => {
               const key = `sensor${index + 1}`
               const reading = Math.round(parsedData[key] || 0)
-              const isAlerting = reading > THRESHOLD
+              const isAlerting = reading > threshold
               const newStatus = isAlerting ? 'Gas Detected' : 'Safe'
 
               newSensors[sensorId] = {
@@ -107,7 +154,7 @@ export default function App() {
             return newSensors
           })
         } catch (error) {
-          console.error('Error parsing sensor data:', error)
+          console.error('Error processing UART data:', error)
         }
       }
 
@@ -146,6 +193,10 @@ export default function App() {
     connectToUART()
   }
 
+  const handleThresholdChange = (newThreshold) => {
+    setThreshold(newThreshold)
+  }
+
   const renderEmptyState = () => (
     <div className="empty-state">
       <div className="empty-state-content">
@@ -181,6 +232,16 @@ export default function App() {
             {isDarkMode ? '☀️' : '🌙'}
           </button>
           <div className="header-buttons">
+            {isConnected && (
+              <button
+                className="settings-button"
+                onClick={() => setShowSettings(true)}
+                title="Open sensor settings"
+                aria-label="Settings"
+              >
+                ⚙️ Settings
+              </button>
+            )}
             {!isConnected && (
               <button
                 className="reconnect-button"
@@ -211,7 +272,7 @@ export default function App() {
                 reading={sensors[sensorId].reading}
                 status={sensors[sensorId].status}
                 isAlerting={sensors[sensorId].isAlerting}
-                threshold={THRESHOLD}
+                threshold={threshold}
               />
             ))}
           </main>
@@ -220,6 +281,14 @@ export default function App() {
             <EventLog events={events} />
           </footer>
         </>
+      )}
+
+      {showSettings && (
+        <SettingsPanel
+          threshold={threshold}
+          onThresholdChange={handleThresholdChange}
+          onClose={() => setShowSettings(false)}
+        />
       )}
     </div>
   )
