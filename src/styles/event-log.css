@@ -1,0 +1,135 @@
+.event-log-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 12px;
+  color: white;
+}
+
+.event-log-title {
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.9);
+  transition: color 0.3s ease;
+}
+
+:root.dark-mode .event-log-title {
+  color: rgba(241, 245, 249, 0.95);
+}
+
+.event-log-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  padding-right: 8px;
+}
+
+.event-log-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.event-log-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.event-log-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.event-log-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.event-log-item {
+  display: flex;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+}
+
+:root.dark-mode .event-log-item {
+  background: rgba(51, 65, 85, 0.4);
+}
+
+.event-log-item.alert {
+  background: rgba(239, 68, 68, 0.2);
+  border-left-color: #fca5a5;
+}
+
+:root.dark-mode .event-log-item.alert {
+  background: rgba(127, 29, 29, 0.5);
+  border-left-color: #ff6b6b;
+}
+
+.event-log-item.normal {
+  background: rgba(74, 222, 128, 0.15);
+  border-left-color: #6ee7b7;
+}
+
+:root.dark-mode .event-log-item.normal {
+  background: rgba(20, 83, 45, 0.5);
+  border-left-color: #4ade80;
+}
+
+.event-log-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+:root.dark-mode .event-log-item:hover {
+  background: rgba(51, 65, 85, 0.6);
+}
+
+.event-timestamp {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  min-width: 50px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+}
+
+.event-message {
+  flex: 1;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.event-log-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+:root.dark-mode .event-log-empty {
+  color: rgba(148, 163, 184, 0.7);
+}
+
+@media (max-width: 768px) {
+  .event-log-item {
+    flex-direction: column;
+    gap: 4px;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .event-timestamp {
+    min-width: auto;
+  }
+}
